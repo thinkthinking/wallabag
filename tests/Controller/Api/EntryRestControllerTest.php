@@ -614,10 +614,10 @@ class EntryRestControllerTest extends WallabagApiTestCase
             'public' => 1,
         ]);
 
-        $this->assertSame(200, $this->client->getResponse()->getStatusCode());
+        $this->assertSame(400, $this->client->getResponse()->getStatusCode());
 
         $content = json_decode($this->client->getResponse()->getContent(), true);
-        $this->assertStringContainsString('The url \'"wallabagIsAwesome"\' is not a valid url', $content);
+        $this->assertStringContainsString('The url \'"wallabagIsAwesome"\' is not a valid url', $content['message']);
     }
 
     public function testPostEntry()
