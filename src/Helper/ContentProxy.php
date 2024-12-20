@@ -152,9 +152,21 @@ class ContentProxy
                 $date = new \DateTime($date);
             }
 
-            $entry->setPublishedAt($date);
+            // Validate if date is reasonable
+            if ($date->getTimestamp() > 0) {
+                $entry->setPublishedAt($date);
+            } else {
+                throw new \Exception('Invalid date value');
+            }
         } catch (\Exception $e) {
-            $this->logger->warning('Error while defining date', ['e' => $e, 'url' => $entry->getUrl(), 'date' => $value]);
+            $this->logger->warning('Error while defining date', [
+                'e' => $e,
+                'url' => $entry->getUrl(),
+                'date' => $value
+            ]);
+            
+            // Set current time as fallback
+            $entry->setPublishedAt(new \DateTime());
         }
     }
 
@@ -282,8 +294,11 @@ class ContentProxy
         }
 
         // Only update publishedAt from content if entry doesn't already have a date
-        if (!empty($content['date']) && null === $entry->getPublishedAt()) {
+        if (!empty($content['date'])) {
             $this->updatePublishedAt($entry, $content['date']);
+        } elseif (null === $entry->getPublishedAt()) {
+            // If no date is available, set current time
+            $entry->setPublishedAt(new \DateTime());
         }
 
         if (!empty($content['language'])) {
