@@ -48,6 +48,17 @@ jobs:
             type=sha
             type=raw,value=latest,enable={{is_default_branch}}
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: bcmath, gd, gettext, iconv, intl, mbstring, opcache, pdo, pdo_mysql, pdo_pgsql, pdo_sqlite, sockets, tidy, zip, redis, imagick
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
@@ -59,3 +70,5 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            NODE_VERSION=20

@@ -34,7 +34,8 @@ RUN apt-get update && apt-get install -y \
         git \
         build-essential \
         gettext-base \
-        nodejs
+        nodejs \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp
 RUN docker-php-ext-install -j "$(nproc)" \
@@ -53,14 +54,13 @@ RUN docker-php-ext-install -j "$(nproc)" \
         tidy \
         zip
 
-RUN pecl install redis; \
-    pecl install imagick; \
-    pecl install xdebug-3.1.6; \
+RUN pecl install redis && \
+    pecl install imagick && \
+    pecl install xdebug-3.1.6 && \
     docker-php-ext-enable \
         redis \
         imagick \
-        xdebug \
-    ;
+        xdebug
 
 RUN version=$(php -r "echo PHP_MAJOR_VERSION.PHP_MINOR_VERSION;") \
     && architecture=$(uname -m) \
@@ -93,9 +93,18 @@ RUN chmod +x /entrypoint.sh && \
         /var/www/html/web/assets \
         /var/www/html/data \
         /var/www/html/data/db \
-        /var/www/.cache
+        /var/www/.cache && \
+    chown -R www-data:www-data /var/www/html
 
 COPY --chown=www-data:www-data . /var/www/html/
+
+# Install dependencies and build assets
+RUN composer install --no-dev --optimize-autoloader && \
+    yarn install && \
+    yarn build:dev && \
+    bin/console wallabag:install --env=prod
+
+VOLUME ["/var/www/html/data", "/var/www/html/web/assets"]
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["php-fpm"]
@@ -103,15 +112,3 @@ CMD ["php-fpm"]
 FROM rootless AS default
 
 ARG USER_UID=1000
-ARG USER_GID=1000
-
-RUN groupmod -g 1000 www-data ; \
-    usermod -u ${USER_UID} -g www-data www-data ; \
-    touch /usr/local/etc/php/conf.d/wallabag-php.ini \
-        /var/www/.yarnrc ; \
-    chown -R www-data: /var/www/html \
-        /usr/local/etc/php/conf.d/wallabag-php.ini \
-        /var/www/.cache \
-        /var/www/.yarnrc
-
-USER www-data
