@@ -82,8 +82,8 @@ RUN curl -L -o /usr/local/bin/envsubst https://github.com/a8m/envsubst/releases/
 
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
-COPY entrypoint.sh /entrypoint.sh
-COPY config/ /opt/wallabag/config/
+COPY ./entrypoint.sh /entrypoint.sh
+COPY ./config/ /opt/wallabag/config/
 
 RUN mkdir -p \
         /var/www/html/app/config/ \
