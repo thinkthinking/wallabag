@@ -83,8 +83,8 @@ WORKDIR /var/www/html
 
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
-COPY ./entrypoint.sh /entrypoint.sh
-COPY ./config/ /opt/wallabag/config/
+COPY docker/php/entrypoint.sh /entrypoint.sh
+COPY docker/php/config/ /opt/wallabag/config/
 
 RUN chmod +x /entrypoint.sh && \
     mkdir -p \
