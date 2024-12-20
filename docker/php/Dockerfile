@@ -96,16 +96,33 @@ RUN chmod +x /entrypoint.sh && \
         /var/www/.cache && \
     chown -R www-data:www-data /var/www/html
 
+# Copy application files
 COPY --chown=www-data:www-data . /var/www/html/
 
+# Set environment variables
+ENV SYMFONY_ENV=prod \
+    DATABASE_DRIVER=pdo_sqlite \
+    DATABASE_PATH="%kernel.project_dir%/data/db/wallabag.sqlite" \
+    DOMAIN_NAME=http://localhost:8000 \
+    SECRET=ch4n63m31fy0uc4n \
+    PHP_SESSION_HANDLER=redis \
+    PHP_SESSION_SAVE_PATH=tcp://redis:6379?database=2 \
+    TRUSTED_PROXIES=0.0.0.0/0
+
 # Install dependencies and build assets
-RUN composer install --no-dev --optimize-autoloader && \
+USER www-data
+RUN composer install --no-dev --no-interaction --optimize-autoloader --prefer-dist && \
     yarn install && \
-    yarn build:dev && \
-    bin/console wallabag:install --env=prod
+    yarn build:dev
 
-VOLUME ["/var/www/html/data", "/var/www/html/web/assets"]
+# Initialize wallabag
+RUN mkdir -p data/db && \
+    php bin/console doctrine:database:create --if-not-exists && \
+    php bin/console wallabag:install --no-interaction
 
+VOLUME ["/var/www/html/data", "/var/www/html/web/assets", "/var/www/.cache"]
+
+USER root
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["php-fpm"]
 

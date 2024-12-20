@@ -72,3 +72,12 @@ jobs:
           cache-to: type=gha,mode=max
           build-args: |
             NODE_VERSION=20
+          secrets: |
+            SYMFONY_ENV=prod
+            DATABASE_DRIVER=pdo_sqlite
+            DATABASE_PATH="%kernel.project_dir%/data/db/wallabag.sqlite"
+            DOMAIN_NAME=http://localhost:8000
+            SECRET=${{ secrets.WALLABAG_SECRET || 'ch4n63m31fy0uc4n' }}
+            PHP_SESSION_HANDLER=redis
+            PHP_SESSION_SAVE_PATH=tcp://redis:6379?database=2
+            TRUSTED_PROXIES=0.0.0.0/0
