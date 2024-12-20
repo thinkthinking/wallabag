@@ -33,10 +33,7 @@ RUN apt-get update && apt-get install -y \
         zlib1g-dev \
         git \
         build-essential \
-        gettext-base \
-        nodejs \
-    && rm -rf /var/lib/apt/lists/*
-
+        nodejs
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp
 RUN docker-php-ext-install -j "$(nproc)" \
         bcmath \
@@ -54,13 +51,14 @@ RUN docker-php-ext-install -j "$(nproc)" \
         tidy \
         zip
 
-RUN pecl install redis && \
-    pecl install imagick && \
-    pecl install xdebug-3.1.6 && \
+RUN pecl install redis; \
+    pecl install imagick; \
+    pecl install xdebug-3.1.6; \
     docker-php-ext-enable \
         redis \
         imagick \
-        xdebug
+        xdebug \
+    ;
 
 RUN version=$(php -r "echo PHP_MAJOR_VERSION.PHP_MINOR_VERSION;") \
     && architecture=$(uname -m) \
@@ -79,53 +77,37 @@ RUN mkdir -p /tmp/blackfire \
 
 RUN npm install -g yarn
 
-WORKDIR /var/www/html
+RUN curl -L -o /usr/local/bin/envsubst https://github.com/a8m/envsubst/releases/download/v1.1.0/envsubst-`uname -s`-`uname -m`; \
+    chmod +x /usr/local/bin/envsubst
 
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
-COPY docker/php/entrypoint.sh /entrypoint.sh
-COPY docker/php/config/ /opt/wallabag/config/
+COPY entrypoint.sh /entrypoint.sh
+COPY config/ /opt/wallabag/config/
 
-RUN chmod +x /entrypoint.sh && \
-    mkdir -p \
+RUN mkdir -p \
         /var/www/html/app/config/ \
         /var/www/html/var/cache \
         /var/www/html/web/assets \
         /var/www/html/data \
         /var/www/html/data/db \
-        /var/www/.cache && \
-    chown -R www-data:www-data /var/www/html
+        /var/www/.cache
 
-# Copy application files
-COPY --chown=www-data:www-data . /var/www/html/
-
-# Set environment variables
-ENV SYMFONY_ENV=prod \
-    DATABASE_DRIVER=pdo_sqlite \
-    DATABASE_PATH="%kernel.project_dir%/data/db/wallabag.sqlite" \
-    DOMAIN_NAME=http://localhost:8000 \
-    SECRET=ch4n63m31fy0uc4n \
-    PHP_SESSION_HANDLER=redis \
-    PHP_SESSION_SAVE_PATH=tcp://redis:6379?database=2 \
-    TRUSTED_PROXIES=0.0.0.0/0
-
-# Install dependencies and build assets
-USER www-data
-RUN composer install --no-dev --no-interaction --optimize-autoloader --prefer-dist && \
-    yarn install && \
-    yarn build:dev
-
-# Initialize wallabag
-RUN mkdir -p data/db && \
-    php bin/console doctrine:database:create --if-not-exists && \
-    php bin/console wallabag:install --no-interaction
-
-VOLUME ["/var/www/html/data", "/var/www/html/web/assets", "/var/www/.cache"]
-
-USER root
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["php-fpm"]
+CMD ["php", "bin/console", "--env=dev", "server:run", "0.0.0.0:8000"]
 
 FROM rootless AS default
 
 ARG USER_UID=1000
+ARG USER_GID=1000
+
+RUN groupmod -g 1000 www-data ; \
+    usermod -u ${USER_UID} -g www-data www-data ; \
+    touch /usr/local/etc/php/conf.d/wallabag-php.ini \
+        /var/www/.yarnrc ; \
+    chown -R www-data: /var/www/html \
+        /usr/local/etc/php/conf.d/wallabag-php.ini \
+        /var/www/.cache \
+        /var/www/.yarnrc
+
+USER www-data

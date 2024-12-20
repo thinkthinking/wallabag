@@ -2,6 +2,8 @@
 
 A release is mostly a git tag of http://github.com/wallabag/wallabag, following [semantic versioning](http://semver.org).
 
+ git tag -a 2.6.10-thinkthinking.2 -m Release wallabag-2.6.10-thinkthinking.2
+
 ### Steps to release
 
 During this documentation, we assume the release is `$LAST_WALLABAG_RELEASE` (like 2.3.4).
