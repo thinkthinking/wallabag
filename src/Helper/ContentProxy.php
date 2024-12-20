@@ -281,7 +281,8 @@ class ContentProxy
             $entry->setHeaders($content['headers']);
         }
 
-        if (!empty($content['date'])) {
+        // Only update publishedAt from content if entry doesn't already have a date
+        if (!empty($content['date']) && null === $entry->getPublishedAt()) {
             $this->updatePublishedAt($entry, $content['date']);
         }
 
