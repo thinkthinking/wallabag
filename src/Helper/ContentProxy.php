@@ -82,11 +82,6 @@ class ContentProxy
 
         $entry->setGivenUrl($url);
 
-        // Handle publishedAt before stockEntry to ensure API value has priority
-        if (!empty($content['published_at'])) {
-            $this->updatePublishedAt($entry, $content['published_at']);
-        }
-
         $this->stockEntry($entry, $content);
     }
 
@@ -299,16 +294,16 @@ class ContentProxy
         }
 
         // Handle publishedAt with priority:
-        // 1. Keep existing publishedAt if it was set through API
-        // 2. Use content date if available and entry doesn't have publishedAt
-        // 3. Use current time as last resort if entry doesn't have publishedAt
-        if (!empty($content['date']) && null === $entry->getPublishedAt()) {
-            $this->updatePublishedAt($entry, $content['date']);
-        } elseif (null === $entry->getPublishedAt()) {
-            // If no date is available, set current time
-            $entry->setPublishedAt(new \DateTime());
+        // 1. Keep existing publishedAt if it's already set (from API)
+        // 2. Use content date if available and no existing publishedAt
+        // 3. Use current time as last resort if no date available
+        if (null === $entry->getPublishedAt()) {
+            if (!empty($content['date'])) {
+                $this->updatePublishedAt($entry, $content['date']);
+            } else {
+                $entry->setPublishedAt(new \DateTime());
+            }
         }
-        // else: keep the existing publishedAt value (API priority)
 
         if (!empty($content['language'])) {
             $this->updateLanguage($entry, $content['language']);

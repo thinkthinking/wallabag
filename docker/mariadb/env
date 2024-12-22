@@ -7,3 +7,4 @@ DATABASE_NAME=wallabag
 DATABASE_USER=root
 DATABASE_PASSWORD=wallaroot
 DATABASE_CHARSET=utf8mb4
+domain_name=http://localhost:7777

@@ -77,7 +77,10 @@ RUN mkdir -p /tmp/blackfire \
 
 RUN npm install -g yarn
 
-RUN curl -L -o /usr/local/bin/envsubst https://github.com/a8m/envsubst/releases/download/v1.1.0/envsubst-`uname -s`-`uname -m`; \
+# RUN curl -L -o /usr/local/bin/envsubst https://github.com/a8m/envsubst/releases/download/v1.4.2/envsubst-`uname -s`-`uname -m`; \
+#     chmod +x /usr/local/bin/envsubst
+
+RUN curl -L -o /usr/local/bin/envsubst https://github.com/a8m/envsubst/releases/download/v1.4.2/envsubst-Linux-arm64 && \
     chmod +x /usr/local/bin/envsubst
 
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer

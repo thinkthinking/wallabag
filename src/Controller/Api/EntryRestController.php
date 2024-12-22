@@ -734,6 +734,11 @@ class EntryRestController extends WallabagRestController
 
         $data = $this->retrieveValueFromRequest($request);
 
+        // First set the publishedAt if provided in the request
+        if (!empty($data['publishedAt'])) {
+            $entry->setPublishedAt(new \DateTime($data['publishedAt']));
+        }
+        
         try {
             $contentProxy->updateEntry(
                 $entry,
@@ -743,8 +748,6 @@ class EntryRestController extends WallabagRestController
                     'html' => !empty($data['content']) ? $data['content'] : $entry->getContent(),
                     'url' => $entry->getUrl(),
                     'language' => !empty($data['language']) ? $data['language'] : $entry->getLanguage(),
-                    'date' => !empty($data['publishedAt']) ? $data['publishedAt'] : $entry->getPublishedAt(),
-                    // faking the open graph preview picture
                     'image' => !empty($data['picture']) ? $data['picture'] : $entry->getPreviewPicture(),
                     'authors' => \is_string($data['authors']) ? explode(',', $data['authors']) : $entry->getPublishedBy(),
                 ]
