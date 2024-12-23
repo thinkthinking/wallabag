@@ -1,5 +1,5 @@
 parameters:
-    wallabag.version: 2.6.10-thinkthinking.4
+    wallabag.version: 2.6.10-thinkthinking.6
     wallabag.paypal_url: "https://liberapay.com/wallabag/donate"
     wallabag.languages:
         en: 'English'
@@ -140,7 +140,7 @@ parameters:
             section: analytics
         -
             name: download_images_enabled
-            value: 0
+            value: 1
             section: misc
         -
             name: wallabag_support_url
