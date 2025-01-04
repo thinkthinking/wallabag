@@ -1,9 +1,19 @@
+## Update Upstream
+
+```
+git remote add upstream https://github.com/wallabag/wallabag.git
+git fetch upstream
+git checkout master
+git merge upstream/master
+```
+
 ## Definition
 
 A release is mostly a git tag of http://github.com/wallabag/wallabag, following [semantic versioning](http://semver.org).
 
- git tag -a 2.6.10-thinkthinking.2 -m Release wallabag-2.6.10-thinkthinking.2
- git push origin 2.6.10-thinkthinking.2
+git tag -a 2.6.10-thinkthinking.7 -m "Release wallabag-2.6.10-thinkthinking.7"
+
+git push origin 2.6.10-thinkthinking.6
 
 ### Steps to release
 
@@ -39,3 +49,5 @@ be locally specified in `composer.lock`:
         }
     }
 ```
+
+

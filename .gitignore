@@ -59,3 +59,4 @@ specialexport.json
 web/custom.css
 
 .env.local
+.DS_Store
